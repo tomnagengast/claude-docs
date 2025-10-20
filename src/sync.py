@@ -14,6 +14,7 @@ from typing import Iterable, List
 import xml.etree.ElementTree as ET
 
 import requests
+from tqdm import tqdm
 
 SITEMAP_URL = "https://docs.claude.com/sitemap.xml"
 DOC_PREFIX = "https://docs.claude.com/en/docs/"
@@ -46,7 +47,7 @@ def download_markdown(paths: Iterable[str], output_dir: Path) -> List[str]:
     output_dir.mkdir(parents=True, exist_ok=True)
     failures: List[str] = []
 
-    for path in paths:
+    for path in tqdm(paths, desc="Downloading docs", unit="doc"):
         md_url = f"{DOC_PREFIX}{path}.md"
         try:
             resp = requests.get(md_url, headers=HEADERS, timeout=30)
