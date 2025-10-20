@@ -33,7 +33,7 @@ jobs:
 
       - name: Run sync script
         run: |
-          uv run --with requests --with tqdm python src/sync.py --output docs
+          uv run --with aiohttp --with tqdm python src/sync.py --output docs
 
       - name: Check for changes
         id: check_changes
