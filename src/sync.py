@@ -21,6 +21,9 @@ SITEMAP_URL = "https://docs.claude.com/sitemap.xml"
 DOC_PREFIX = "https://docs.claude.com/en/docs/"
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; claude-docs-backup/1.0)"}
 MAX_CONCURRENT = 10  # Limit concurrent requests to avoid overwhelming the server
+HIDDEN_PATHS = [
+    "claude-code/claude_code_docs_map",
+]
 
 
 async def fetch_sitemap(session: aiohttp.ClientSession) -> str:
@@ -93,9 +96,10 @@ async def async_main(output_dir: Path) -> None:
         sitemap_xml = await fetch_sitemap(session)
 
     doc_paths = extract_doc_paths(sitemap_xml)
-    failures = await download_markdown(doc_paths, output_dir)
+    all_paths = sorted(set(doc_paths + HIDDEN_PATHS))
+    failures = await download_markdown(all_paths, output_dir)
 
-    print(f"Downloaded {len(doc_paths) - len(failures)} docs to {output_dir.resolve()}")
+    print(f"Downloaded {len(all_paths) - len(failures)} docs to {output_dir.resolve()}")
     if failures:
         print("Failed to download the following paths:")
         for path in failures:

@@ -27,3 +27,7 @@ uv run python src/sync.py --output /path/to/export
 ```
 
 Re-run either command whenever you want to refresh the local copy; existing files are safely overwritten.
+
+## Tips
+
+Trace sessions with `bunx @mariozechner/claude-trace --include-all-requests`
