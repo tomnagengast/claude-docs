@@ -10,5 +10,4 @@ wheels/
 .venv
 
 # Claude Code
-.claude/
-.claude-trace/
+settings.local.json
