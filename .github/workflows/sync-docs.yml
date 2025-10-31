@@ -21,46 +21,31 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
-      - name: Set up Python
-        run: uv python install 3.13
+      - run: uv python install 3.13
 
-      - name: Run sync script
+      - name: Sync docs
+        id: sync
         run: |
           uv run --with aiohttp --with tqdm python src/sync.py --output docs
-
-      - name: Check for changes
-        id: check_changes
-        run: |
           [[ -n $(git status -s docs/) ]] && echo "has_changes=true" >> $GITHUB_OUTPUT || echo "has_changes=false" >> $GITHUB_OUTPUT
 
-      - name: Generate Claude summary
-        id: claude_summary
-        if: steps.check_changes.outputs.has_changes == 'true'
+      - name: Summarize and merge changes
+        if: steps.sync.outputs.has_changes == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: "/pr"
+          prompt: /pr
+          allowed_tools: Bash,Read,WebSearch
+          max_turns: 20
+          model: sonnet
+          show_full_output: true
+          claude_env: |
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           settings: |
-            {
-              "permissions": {
-                "allow": [
-                  "Bash",
-                  "Read",
-                  "WebSearch"
-                ],
-                "defaultMode": "bypassPermissions"
-              },
-              "max-turns": 20,
-              "model": "claude-sonnet-4-5-20250929",
-              "env": {
-                "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
-              }
-            }
+            { "includeCoAuthoredBy": false }
