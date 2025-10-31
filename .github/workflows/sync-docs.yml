@@ -5,11 +5,11 @@ on:
     # Runs at 6:00 AM PT (14:00 UTC, accounting for PST/PDT)
     # Note: GitHub Actions uses UTC, so 6am PT = 2pm UTC (PST) or 1pm UTC (PDT)
     # Using 2pm UTC to cover PST
-    - cron: '0 14 * * *'
+    - cron: "0 14 * * *"
     # Runs at 6:00 PM PT (2:00 AM UTC next day, accounting for PST/PDT)
     # 6pm PT = 2am UTC next day (PST) or 1am UTC next day (PDT)
     # Using 2am UTC to cover PST
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -47,10 +47,20 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          settings: |
-            {"env": {"GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"}}
-          claude_args: |
-            --max-turns 20
-            --allowedTools Bash,Read,WebSearch
-            --model claude-sonnet-4-5-20250929
           prompt: "/pr"
+          settings: |
+            {
+              "permissions": {
+                "allow": [
+                  "Bash",
+                  "Read",
+                  "WebSearch"
+                ],
+                "defaultMode": "bypassPermissions"
+              },
+              "max-turns": 20,
+              "model": "claude-sonnet-4-5-20250929",
+              "env": {
+                "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+              }
+            }
