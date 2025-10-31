@@ -47,5 +47,6 @@ jobs:
           show_full_output: true
           claude_env: |
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_RUN_NUMBER: ${{ github.run_number }}
           settings: |
             { "includeCoAuthoredBy": false }

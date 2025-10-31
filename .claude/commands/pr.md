@@ -6,7 +6,7 @@ Generate and new GitHub PR and immediately merge. Use the PR summary to provide 
 
 1. Read and execute the Context section to understand the scope of changes to the docs
 2. Create a new PR
-   - `gh pr create --title "Update Claude documentation - ${{ github.run_number }}" --body "<Read the Briefing section and follow it's instructions>" --label claude"`
+   - `gh pr create --title "Update Claude documentation - $GH_RUN_NUMBER" --body "<Read the Briefing section and follow it's instructions>" --label claude"`
 3. Merge the PR
    - `gh pr merge $PR_NUMBER --merge --delete-branch`
 
