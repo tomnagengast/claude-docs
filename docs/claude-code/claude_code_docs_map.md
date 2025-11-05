@@ -220,21 +220,14 @@ This map uses a hierarchical structure:
 
 ### [output-styles](https://docs.claude.com/en/docs/claude-code/output-styles.md)
 
-* Deprecation timeline
-* Alternative: Use plugins instead
-  * Example: Explanatory Output Style Plugin
-  * Installing a plugin
-* Migration guide
-  * Use SessionStart hooks for context injection
-  * Use Subagents for different system prompts
-* Reference: Original output styles documentation
-  * Built-in output styles
-  * How output styles work
-  * Change your output style
-  * Comparisons to related features
-    * Output Styles vs. CLAUDE.md vs. --append-system-prompt
-    * Output Styles vs. [Agents](/en/docs/claude-code/sub-agents)
-    * Output Styles vs. [Custom Slash Commands](/en/docs/claude-code/slash-commands)
+* Built-in output styles
+* How output styles work
+* Change your output style
+* Create a custom output style
+* Comparisons to related features
+  * Output Styles vs. CLAUDE.md vs. --append-system-prompt
+  * Output Styles vs. [Agents](/en/docs/claude-code/sub-agents)
+  * Output Styles vs. [Custom Slash Commands](/en/docs/claude-code/slash-commands)
 
 ### [hooks-guide](https://docs.claude.com/en/docs/claude-code/hooks-guide.md)
 
