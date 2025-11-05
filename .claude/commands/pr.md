@@ -12,6 +12,8 @@ Generate and new GitHub PR and immediately merge. Use the PR summary to provide 
 
 ## Context
 
+- git checkout -b sync-docs-$GITHUB_RUN_NUMBER
+- git push -u origin sync-docs-$GITHUB_RUN_NUMBER
 - git add -A
 - git ls-files docs/
 - git log --stat --format="%h %an %ad %s" --date=short -15 docs/
