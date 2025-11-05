@@ -1,3 +1,7 @@
+# System files
+.DS_Store
+.vscode/
+
 # Python-generated files
 __pycache__/
 *.py[oc]

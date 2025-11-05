@@ -4,18 +4,20 @@ Generate and new GitHub PR and immediately merge. Use the PR summary to provide 
 
 ## Instructions
 
-1. Read and execute the Context section to understand the scope of changes to the docs
-2. Create a new PR
+1. Setup a new working branch
+   - `git checkout -b sync-docs-$GITHUB_RUN_NUMBER`
+   - `git push -u origin sync-docs-$GITHUB_RUN_NUMBER`
+2. Understand the scope of changes to the docs
+   - Review existing docs: `git ls-files docs/`
+   - Review what has been a focus recently: `git log --stat --format=$'\n%h %an %ad %s' --date=short -15 docs/`
+   - Inspect the new changes: `git diff docs/`
+3. Commit the new changes
+   - `git add -A`
+   - `git commit -m 'docs: <Add a high-level summary of the changes>'`
+4. Create a new PR
    - `gh pr create --title "Update Claude documentation - $GH_RUN_NUMBER" --body "<Read the Briefing section and follow it's instructions>" --label claude"`
-3. Merge the PR
+5. Merge the PR
    - `gh pr merge $PR_NUMBER --merge --delete-branch`
-
-## Context
-
-- git add -A
-- git ls-files docs/
-- git log --stat --format="%h %an %ad %s" --date=short -15 docs/
-- git diff docs/
 
 ## Briefing
 
