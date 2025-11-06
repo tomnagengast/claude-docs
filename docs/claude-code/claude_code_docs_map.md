@@ -229,8 +229,8 @@ This map uses a hierarchical structure:
 * Create a custom output style
 * Comparisons to related features
   * Output Styles vs. CLAUDE.md vs. --append-system-prompt
-  * Output Styles vs. [Agents](/en/docs/claude-code/sub-agents)
-  * Output Styles vs. [Custom Slash Commands](/en/docs/claude-code/slash-commands)
+  * Output Styles vs. [Agents](/en/sub-agents)
+  * Output Styles vs. [Custom Slash Commands](/en/slash-commands)
 
 ### [hooks-guide](https://code.claude.com/docs/en/hooks-guide.md)
 
