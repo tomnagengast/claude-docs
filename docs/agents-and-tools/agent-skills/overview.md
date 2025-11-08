@@ -13,7 +13,7 @@ Skills are reusable, filesystem-based resources that provide Claude with domain-
 * **Compose capabilities**: Combine Skills to build complex workflows
 
 <Note>
-  For a deep dive into the architecture and real-world applications of Agent Skills, read our engineering blog: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills).
+  For a deep dive into the architecture and real-world applications of Agent Skills, read our engineering blog: [Equipping agents for the real world with Agent Skills](https://https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills-skills).
 </Note>
 
 ## Using Skills
@@ -163,27 +163,27 @@ The Claude API supports both pre-built Agent Skills and custom Skills. Both work
 
 Use pre-built Agent Skills by referencing their `skill_id` (e.g., `pptx`, `xlsx`), or create and upload your own via the Skills API (`/v1/skills` endpoints). Custom Skills are shared organization-wide.
 
-To learn more, see [Use Skills with the Claude API](/en/api/skills-guide).
+To learn more, see [Use Skills with the Claude API](/en/docs/build-with-claude/skills-guide).
 
 ### Claude Code
 
-[Claude Code](/en/docs/claude-code/overview) supports only Custom Skills.
+[Claude Code](https://code.claude.com/docs/overview) supports only Custom Skills.
 
 **Custom Skills**: Create Skills as directories with SKILL.md files. Claude discovers and uses them automatically.
 
 Custom Skills in Claude Code are filesystem-based and don't require API uploads.
 
-To learn more, see [Use Skills in Claude Code](/en/docs/claude-code/skills).
+To learn more, see [Use Skills in Claude Code](https://code.claude.com/docs/skills).
 
 ### Claude Agent SDK
 
-The [Claude Agent SDK](/en/api/agent-sdk/overview) supports custom Skills through filesystem-based configuration.
+The [Claude Agent SDK](/en/docs/agent-sdk/overview) supports custom Skills through filesystem-based configuration.
 
 **Custom Skills**: Create Skills as directories with SKILL.md files in `.claude/skills/`. Enable Skills by including `"Skill"` in your `allowed_tools` configuration.
 
 Skills in the Agent SDK are then automatically discovered when the SDK runs.
 
-To learn more, see [Agent Skills in the SDK](/en/api/agent-sdk/skills).
+To learn more, see [Agent Skills in the SDK](/en/docs/agent-sdk/skills).
 
 ### Claude.ai
 
@@ -318,15 +318,15 @@ Plan your Skills to work within these constraints.
     Create your first Skill
   </Card>
 
-  <Card title="API Guide" icon="code" href="/en/api/skills-guide">
+  <Card title="API Guide" icon="code" href="/en/docs/build-with-claude/skills-guide">
     Use Skills with the Claude API
   </Card>
 
-  <Card title="Use Skills in Claude Code" icon="terminal" href="/en/docs/claude-code/skills">
+  <Card title="Use Skills in Claude Code" icon="terminal" href="https://code.claude.com/docs/skills">
     Create and manage custom Skills in Claude Code
   </Card>
 
-  <Card title="Use Skills in the Agent SDK" icon="cube" href="/en/api/agent-sdk/skills">
+  <Card title="Use Skills in the Agent SDK" icon="cube" href="/en/docs/agent-sdk/skills">
     Use Skills programmatically in TypeScript and Python
   </Card>
 
