@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 import xml.etree.ElementTree as ET
@@ -17,8 +18,6 @@ import xml.etree.ElementTree as ET
 import aiohttp
 from tqdm.asyncio import tqdm
 
-SITEMAP_URL = "https://docs.claude.com/sitemap.xml"
-DOC_PREFIX = "https://docs.claude.com/en/docs/"
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; claude-docs-backup/1.0)"}
 MAX_CONCURRENT = 10  # Limit concurrent requests to avoid overwhelming the server
 HIDDEN_PATHS = [
@@ -26,62 +25,106 @@ HIDDEN_PATHS = [
 ]
 
 
-async def fetch_sitemap(session: aiohttp.ClientSession) -> str:
-    async with session.get(SITEMAP_URL, headers=HEADERS, timeout=30) as resp:
+@dataclass(frozen=True)
+class SiteConfig:
+    name: str
+    sitemap_url: str
+    doc_prefixes: List[str]
+    output_subdir: Path
+    hidden_paths: List[str]
+
+
+@dataclass(frozen=True)
+class DocEntry:
+    url: str
+    path: str
+
+
+SITES: List[SiteConfig] = [
+    SiteConfig(
+        name="docs.claude.com",
+        sitemap_url="https://docs.claude.com/sitemap.xml",
+        doc_prefixes=["https://docs.claude.com/en/docs/"],
+        output_subdir=Path("."),
+        hidden_paths=HIDDEN_PATHS,
+    ),
+    SiteConfig(
+        name="code.claude.com",
+        sitemap_url="https://code.claude.com/docs/sitemap.xml",
+        # Support both potential URL shapes just in case:
+        # - https://code.claude.com/docs/en/overview
+        # - https://code.claude.com/en/overview
+        doc_prefixes=[
+            "https://code.claude.com/docs/en/",
+            "https://code.claude.com/en/",
+        ],
+        output_subdir=Path("claude-code"),
+        hidden_paths=[],
+    ),
+]
+
+
+async def fetch_sitemap(
+    session: aiohttp.ClientSession, sitemap_url: str
+) -> str:
+    async with session.get(sitemap_url, headers=HEADERS, timeout=30) as resp:
         resp.raise_for_status()
         return await resp.text()
 
 
-def extract_doc_paths(sitemap_xml: str) -> List[str]:
+def extract_doc_entries(sitemap_xml: str, doc_prefixes: List[str]) -> List[DocEntry]:
     root = ET.fromstring(sitemap_xml)
     # sitemap uses this namespace for urlset + url/loc entries
     ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-    paths: List[str] = []
+    docs: List[DocEntry] = []
     for loc in root.findall(".//sm:loc", ns):
-        url = loc.text or ""
-        if not url.startswith(DOC_PREFIX):
+        url = (loc.text or "").strip()
+        if not url:
             continue
-        path = url[len(DOC_PREFIX) :].strip("/")
-        if path:
-            paths.append(path)
-    paths.sort()
-    return paths
+        for prefix in doc_prefixes:
+            if url.startswith(prefix):
+                path = url[len(prefix) :].strip("/")
+                if path:
+                    docs.append(DocEntry(url=url.rstrip("/"), path=path))
+                break
+    docs.sort(key=lambda d: d.path)
+    return docs
 
 
 async def download_single_doc(
     session: aiohttp.ClientSession,
-    path: str,
+    doc: DocEntry,
     output_dir: Path,
     semaphore: asyncio.Semaphore,
 ) -> str | None:
     """Download a single document. Returns path on failure, None on success."""
-    md_url = f"{DOC_PREFIX}{path}.md"
+    md_url = f"{doc.url}.md"
 
     async with semaphore:
         try:
             async with session.get(md_url, headers=HEADERS, timeout=30) as resp:
                 if resp.status == 404:
-                    return path
+                    return doc.path
                 resp.raise_for_status()
                 content = await resp.read()
         except (aiohttp.ClientError, asyncio.TimeoutError):
-            return path
+            return doc.path
 
-        destination = output_dir.joinpath(*path.split("/")).with_suffix(".md")
+        destination = output_dir.joinpath(*doc.path.split("/")).with_suffix(".md")
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(content)
 
     return None
 
 
-async def download_markdown(paths: List[str], output_dir: Path) -> List[str]:
+async def download_markdown(docs: List[DocEntry], output_dir: Path) -> List[str]:
     output_dir.mkdir(parents=True, exist_ok=True)
     semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 
     async with aiohttp.ClientSession() as session:
         tasks = [
-            download_single_doc(session, path, output_dir, semaphore)
-            for path in paths
+            download_single_doc(session, doc, output_dir, semaphore)
+            for doc in docs
         ]
 
         results = await tqdm.gather(*tasks, desc="Downloading docs", unit="doc")
@@ -92,18 +135,44 @@ async def download_markdown(paths: List[str], output_dir: Path) -> List[str]:
 
 
 async def async_main(output_dir: Path) -> None:
-    async with aiohttp.ClientSession() as session:
-        sitemap_xml = await fetch_sitemap(session)
+    total_docs = 0
+    total_failures = 0
 
-    doc_paths = extract_doc_paths(sitemap_xml)
-    all_paths = sorted(set(doc_paths + HIDDEN_PATHS))
-    failures = await download_markdown(all_paths, output_dir)
+    for site in SITES:
+        print(f"Processing {site.name} sitemap...")
+        async with aiohttp.ClientSession() as session:
+            sitemap_xml = await fetch_sitemap(session, site.sitemap_url)
 
-    print(f"Downloaded {len(all_paths) - len(failures)} docs to {output_dir.resolve()}")
-    if failures:
-        print("Failed to download the following paths:")
-        for path in failures:
-            print(f" - {path}")
+        docs = extract_doc_entries(sitemap_xml, site.doc_prefixes)
+
+        if site.hidden_paths:
+            default_prefix = site.doc_prefixes[0]
+            for path in site.hidden_paths:
+                docs.append(
+                    DocEntry(
+                        url=f"{default_prefix}{path}".rstrip("/"),
+                        path=path,
+                    )
+                )
+
+        # Deduplicate by path in case hidden paths overlap with sitemap entries
+        unique_docs = {doc.path: doc for doc in docs}
+        docs = sorted(unique_docs.values(), key=lambda d: d.path)
+
+        site_output_dir = output_dir / site.output_subdir
+        failures = await download_markdown(docs, site_output_dir)
+
+        total_docs += len(docs)
+        total_failures += len(failures)
+
+        print(
+            f"Downloaded {len(docs) - len(failures)} docs from {site.name} "
+            f"to {site_output_dir.resolve()}"
+        )
+        if failures:
+            print(f"Failed to download the following paths from {site.name}:")
+            for path in failures:
+                print(f" - {path}")
 
 
 def main() -> None:
