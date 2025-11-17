@@ -1,33 +1,29 @@
 # Claude Docs Sync
 
-Scripted mirror of the public Claude documentation that saves each page as Markdown.
+Mirror the public Claude product and Claude Code docs as Markdown.
+The script walks each sitemap, fetches the `.md` representation of every page, and rebuilds the same folder structure locally.
 
-## Prerequisites
+## Sources
 
-- [uv](https://github.com/astral-sh/uv)
+- https://docs.claude.com/en/docs/
+- https://code.claude.com/docs/
 
-## Install
+## Setup
 
-```bash
-uv sync
-```
+- Install dependencies with [uv](https://github.com/astral-sh/uv): `uv sync`
 
-## Usage
+## Refresh the docs
 
-Download the docs into the default `docs/` directory:
+- Default run (writes to `docs/`, with Claude Code docs nested under `docs/claude-code/`):
 
-```bash
-uv run claude-docs
-```
+  ```bash
+  uv run claude-docs
+  ```
 
-Or call the module directly and choose a custom destination:
+- Custom target folder:
 
-```bash
-uv run python src/sync.py --output /path/to/export
-```
+  ```bash
+  uv run python src/sync.py --output /path/to/export
+  ```
 
-Re-run either command whenever you want to refresh the local copy; existing files are safely overwritten.
-
-## Tips
-
-Trace sessions with `bunx @mariozechner/claude-trace --include-all-requests`
+Each run overwrites the existing Markdown files so re-running the command is the only maintenance needed.
