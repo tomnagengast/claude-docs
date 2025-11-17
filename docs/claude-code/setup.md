@@ -163,6 +163,13 @@ curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd 1.0.58 &&
   Make sure that you remove any outdated aliases or symlinks before installing.
 </Tip>
 
+**Binary integrity and code signing**
+
+* SHA256 checksums for all platforms are published in the release manifests, currently located at `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{VERSION}/manifest.json` (example: replace `{VERSION}` with `2.0.30`)
+* Signed binaries are distributed for the following platforms:
+  * macOS: Signed by "Anthropic PBC" and notarized by Apple
+  * Windows: Signed by "Anthropic, PBC"
+
 ### NPM installation
 
 For environments where NPM is preferred or required:
